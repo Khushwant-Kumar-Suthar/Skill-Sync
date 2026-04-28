@@ -26,7 +26,7 @@ SkillSync solves this by combining DSA tracking, skill evaluation, and GitHub ac
 - MySQL
 
 **Frontend**
-- React / JSP + Bootstrap
+- React 
 
 ## 🏗 System Architecture
 SkillSync follows a layered architecture with modular separation.

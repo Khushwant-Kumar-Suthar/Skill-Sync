@@ -314,11 +314,7 @@ All errors return the same shape:
 ## Complete Module Structure
 
 ```
-<<<<<<< HEAD
-com.skillsync.backend
-=======
 com.skillsync
->>>>>>> 70dc019 (logging and audit technique implemented using log folder)
 ├── auth/                      ← Register & Login
 ├── user/                      ← Profile, change password
 ├── skill/                     ← Skill CRUD (admin)

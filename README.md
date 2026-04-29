@@ -80,6 +80,5 @@ Frontend runs on `http://localhost:3000` and proxies API requests from `/api` to
 - **Java version mismatch**: ensure `java -version` reports Java 21.
 
 ## License
-
-Add a license if you plan to open-source this project.
+MIT License
 

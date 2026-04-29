@@ -1,0 +1,42 @@
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+.idea/
+.vscode/
+*.sw?
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# --- Secrets / env files ---
+.env
+.env.*
+!.env.example
+
+# --- Logs ---
+*.log
+logs/
+
+# --- Java / Maven / Spring ---
+**/target/
+**/.classpath
+**/.project
+**/.settings/
+**/.springBeans
+
+# Common “compiled output” folders that should never be committed
+skillsync-backend/bin/
+
+# --- Node / Vite / React ---
+**/node_modules/
+**/dist/
+**/dist-ssr/
+**/*.local
+
+# --- Test / tooling output ---
+coverage/
+playwright-report/
+

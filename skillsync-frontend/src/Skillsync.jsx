@@ -504,6 +504,24 @@ const diffBadge = (d) => (
   <span className={`badge ${d === "BEGINNER" ? "badge-green" : d === "INTERMEDIATE" ? "badge-amber" : "badge-red"}`}>{d}</span>
 );
 
+const dsaDiffBadge = (d) => {
+  if (d === "EASY") return <span className="badge badge-green">EASY</span>;
+  if (d === "MEDIUM") return <span className="badge badge-amber">MEDIUM</span>;
+  return <span className="badge badge-red">HARD</span>;
+};
+
+const tagChips = (tags) => {
+  if (!tags?.length) return <span style={{ color: "var(--text3)" }}>—</span>;
+  return (
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+      {tags.slice(0, 4).map((t, i) => (
+        <span key={i} className="badge badge-gray">{t}</span>
+      ))}
+      {tags.length > 4 && <span className="badge badge-gray">+{tags.length - 4}</span>}
+    </div>
+  );
+};
+
 // ─── Auth Page ────────────────────────────────────────────────────────────────
 function AuthPage() {
   const { login } = useAuth();
@@ -789,6 +807,363 @@ function RecommendationsPage() {
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+// ─── DSA — Problems Page ───────────────────────────────────────────────────────
+function DsaProblemsPage() {
+  const [problems, setProblems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [plan, setPlan] = useState("normal");
+  const [plans, setPlans] = useState([]);
+  const [planProgress, setPlanProgress] = useState(null);
+  const [difficulty, setDifficulty] = useState("");
+  const [tag, setTag] = useState("");
+  const [selected, setSelected] = useState(null);
+  const [attemptForm, setAttemptForm] = useState({ status: "TODO", language: "Java", notes: "" });
+  const [saving, setSaving] = useState(false);
+
+  const load = useCallback(() => {
+    setLoading(true);
+    const qs = new URLSearchParams();
+    if (difficulty) qs.set("difficulty", difficulty);
+    if (tag) qs.set("tag", tag);
+
+    const base = plan && plan !== "normal"
+      ? `/dsa/plans/${plan}/problems`
+      : `/problems`;
+
+    api.get(`${base}${qs.toString() ? `?${qs}` : ""}`)
+      .then(r => { setProblems(r.data || []); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, [difficulty, tag, plan]);
+
+  useEffect(() => { load(); }, [load]);
+
+  useEffect(() => {
+    api.get("/dsa/plans")
+      .then(r => setPlans(r.data || []))
+      .catch(() => setPlans([]));
+  }, []);
+
+  useEffect(() => {
+    api.get(`/dsa/plans/${plan}/progress`)
+      .then(r => setPlanProgress(r.data))
+      .catch(() => setPlanProgress(null));
+  }, [plan]);
+
+  const openProblem = async (slug) => {
+    try {
+      const r = await api.get(`/problems/${slug}`);
+      setSelected(r.data);
+      setAttemptForm({ status: "TODO", language: "Java", notes: "" });
+    } catch (err) {
+      toast.error(err.message);
+    }
+  };
+
+  const logAttempt = async (e) => {
+    e.preventDefault();
+    if (!selected?.id) return;
+    setSaving(true);
+    try {
+      await api.post(`/attempts/problems/${selected.id}`, attemptForm);
+      toast.success("Attempt saved!");
+      api.get(`/dsa/plans/${plan}/progress`)
+        .then(r => setPlanProgress(r.data))
+        .catch(() => {});
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fade-in">
+      <div className="page-header">
+        <div className="page-title">DSA Problems</div>
+        <div className="page-sub">Browse the 300-question set and track your attempts</div>
+      </div>
+
+      <div className="card" style={{ marginBottom: 20 }}>
+        <div className="form-row">
+          <div className="form-group">
+            <label className="form-label">Plan</label>
+            <select className="form-select" value={plan} onChange={e => setPlan(e.target.value)}>
+              {/* fallback options if API fails */}
+              <option value="normal">Normal (All)</option>
+              <option value="top-75">Top 75</option>
+              <option value="top-150">Top 150</option>
+              {plans
+                .filter(p => !["normal", "top-75", "top-150"].includes(p.slug))
+                .map(p => (
+                  <option key={p.slug} value={p.slug}>{p.name}</option>
+                ))}
+            </select>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Difficulty</label>
+            <select className="form-select" value={difficulty} onChange={e => setDifficulty(e.target.value)}>
+              <option value="">All</option>
+              <option value="EASY">EASY</option>
+              <option value="MEDIUM">MEDIUM</option>
+              <option value="HARD">HARD</option>
+            </select>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Tag (name)</label>
+            <input className="form-input" placeholder="Arrays, BFS, Google…"
+              value={tag} onChange={e => setTag(e.target.value)} />
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: 10 }}>
+          <button className="btn btn-secondary btn-sm" onClick={() => { setDifficulty(""); setTag(""); }}>
+            Reset
+          </button>
+          <button className="btn btn-primary btn-sm" onClick={load}>
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      {planProgress && (
+        <div className="card" style={{ marginBottom: 20 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
+            <div>
+              <div style={{ fontFamily: "var(--font-head)", fontSize: 16, fontWeight: 800 }}>
+                {planProgress.planName}
+              </div>
+              <div style={{ color: "var(--text3)", fontSize: 13 }}>
+                Solved <span style={{ color: "var(--text)", fontWeight: 700 }}>{planProgress.solved}</span> /
+                <span style={{ color: "var(--text)", fontWeight: 700 }}> {planProgress.totalProblems}</span>
+                {" "}· Attempted {planProgress.attempted} · Remaining {planProgress.remaining}
+              </div>
+            </div>
+            <div style={{ minWidth: 220, flex: 1, maxWidth: 360 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "var(--text3)", marginBottom: 6 }}>
+                <span>Completion</span>
+                <span style={{ color: "var(--text2)", fontWeight: 700 }}>{planProgress.completionPercent}%</span>
+              </div>
+              <div className="progress-bar-wrap">
+                <div className="progress-bar-fill" style={{ width: `${Math.min(100, Math.max(0, planProgress.completionPercent))}%` }} />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {loading ? (
+        <div className="loading-page"><div className="spinner" /><span>Loading problems…</span></div>
+      ) : (
+        <div className="card" style={{ padding: 0 }}>
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Difficulty</th>
+                  <th>Tags</th>
+                  <th>Link</th>
+                </tr>
+              </thead>
+              <tbody>
+                {problems.length === 0 ? (
+                  <tr><td colSpan={4} style={{ textAlign: "center", color: "var(--text3)", padding: "40px 0" }}>No problems found</td></tr>
+                ) : problems.map(p => (
+                  <tr key={p.id} style={{ cursor: "pointer" }} onClick={() => openProblem(p.slug)}>
+                    <td style={{ fontWeight: 500, color: "var(--text)" }}>{p.title}</td>
+                    <td>{dsaDiffBadge(p.difficulty)}</td>
+                    <td>{tagChips(Array.from(p.tags || []))}</td>
+                    <td>
+                      {p.sourceUrl ? (
+                        <a href={p.sourceUrl} target="_blank" rel="noreferrer" style={{ color: "var(--blue)" }} onClick={e => e.stopPropagation()}>
+                          Open
+                        </a>
+                      ) : "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {selected && (
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setSelected(null)}>
+          <div className="modal-box" style={{ maxWidth: 720 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 10, marginBottom: 10 }}>
+              <div>
+                <div className="modal-title" style={{ marginBottom: 6 }}>{selected.title}</div>
+                <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+                  {dsaDiffBadge(selected.difficulty)}
+                  {tagChips(Array.from(selected.tags || []))}
+                </div>
+              </div>
+              <button className="btn btn-secondary btn-sm" onClick={() => setSelected(null)}>Close</button>
+            </div>
+
+            {selected.description && (
+              <div style={{ color: "var(--text2)", fontSize: 13, marginBottom: 16 }}>
+                {selected.description}
+              </div>
+            )}
+
+            <div className="section-title" style={{ marginBottom: 16, fontSize: 14 }}>Log attempt <div className="line" /></div>
+            <form onSubmit={logAttempt}>
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Status</label>
+                  <select className="form-select" value={attemptForm.status}
+                    onChange={e => setAttemptForm(f => ({ ...f, status: e.target.value }))}>
+                    <option>TODO</option>
+                    <option>ATTEMPTED</option>
+                    <option>SOLVED</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Language</label>
+                  <input className="form-input" value={attemptForm.language}
+                    onChange={e => setAttemptForm(f => ({ ...f, language: e.target.value }))} />
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Notes</label>
+                <textarea className="form-textarea" value={attemptForm.notes}
+                  onChange={e => setAttemptForm(f => ({ ...f, notes: e.target.value }))} />
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setSelected(null)}>Cancel</button>
+                <button className="btn btn-primary" type="submit" disabled={saving}>
+                  {saving ? <span className="spinner" /> : "Save Attempt"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── DSA — My Attempts Page ────────────────────────────────────────────────────
+function DsaAttemptsPage() {
+  const [attempts, setAttempts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const load = useCallback(() => {
+    setLoading(true);
+    api.get("/attempts/me")
+      .then(r => { setAttempts(r.data || []); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  return (
+    <div className="fade-in">
+      <div className="page-header">
+        <div className="page-title">My Attempts</div>
+        <div className="page-sub">Your recent problem activity</div>
+      </div>
+
+      {loading ? (
+        <div className="loading-page"><div className="spinner" /><span>Loading attempts…</span></div>
+      ) : (
+        <div className="card" style={{ padding: 0 }}>
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Problem</th>
+                  <th>Status</th>
+                  <th>Language</th>
+                  <th>Attempted</th>
+                </tr>
+              </thead>
+              <tbody>
+                {attempts.length === 0 ? (
+                  <tr><td colSpan={4} style={{ textAlign: "center", color: "var(--text3)", padding: "40px 0" }}>No attempts yet</td></tr>
+                ) : attempts.map(a => (
+                  <tr key={a.id}>
+                    <td style={{ fontWeight: 500, color: "var(--text)" }}>{a.problemTitle}</td>
+                    <td>
+                      <span className={`badge ${a.status === "SOLVED" ? "badge-green" : a.status === "ATTEMPTED" ? "badge-amber" : "badge-gray"}`}>
+                        {a.status}
+                      </span>
+                    </td>
+                    <td>{a.language || "—"}</td>
+                    <td>{fmtDate(a.attemptedAt)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div style={{ padding: "12px 16px", borderTop: "1px solid var(--border)", display: "flex", justifyContent: "flex-end" }}>
+            <button className="btn btn-secondary btn-xs" onClick={load}>Refresh</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── DSA — Problem Recommendations Page ────────────────────────────────────────
+function DsaProblemRecsPage() {
+  const [recs, setRecs] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const load = useCallback(() => {
+    setLoading(true);
+    api.get("/recommendations/problems")
+      .then(r => { setRecs(r.data || []); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  if (loading) return <div className="loading-page"><div className="spinner" /><span>Generating problem recommendations…</span></div>;
+
+  return (
+    <div className="fade-in">
+      <div className="page-header">
+        <div className="page-title">Problem Recommendations</div>
+        <div className="page-sub">Next problems based on your weak areas</div>
+      </div>
+
+      {recs.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-icon">🧩</div>
+          <div className="empty-title">No recommendations yet</div>
+          <div className="empty-sub">Try logging a few attempts (ATTEMPTED / SOLVED) first</div>
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {recs.map((p, i) => (
+            <div key={i} className="card card-sm" style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
+                  <div style={{ fontWeight: 700, color: "var(--text)" }}>{p.title}</div>
+                  {dsaDiffBadge(p.difficulty)}
+                </div>
+                <div style={{ color: "var(--text2)", fontSize: 13, marginTop: 6 }}>{p.reason}</div>
+                <div style={{ marginTop: 10 }}>{tagChips(Array.from(p.tags || []))}</div>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <button className="btn btn-secondary btn-xs" onClick={() => window.open(`https://leetcode.com/problems/${p.slug}/`, "_blank")}>
+                  Open
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div style={{ marginTop: 16 }}>
+        <button className="btn btn-secondary btn-sm" onClick={load}>Refresh</button>
+      </div>
     </div>
   );
 }
@@ -1369,6 +1744,9 @@ function Sidebar({ current, navigate }) {
   const userNav = [
     { id: "dashboard",       icon: "⬛", label: "Dashboard" },
     { id: "progress",        icon: "📈", label: "My Progress" },
+    { id: "dsa-problems",    icon: "🧩", label: "DSA Problems" },
+    { id: "dsa-attempts",    icon: "📝", label: "My Attempts" },
+    { id: "dsa-recs",        icon: "🎯", label: "Problem Recs" },
     { id: "recommendations", icon: "💡", label: "Recommendations" },
     { id: "roadmap",         icon: "🗺️", label: "Roadmap" },
     { id: "profile",         icon: "👤", label: "Profile" },
@@ -1434,6 +1812,9 @@ function AppShell() {
   const pages = {
     dashboard:       <DashboardPage />,
     progress:        <ProgressPage />,
+    "dsa-problems":  <DsaProblemsPage />,
+    "dsa-attempts":  <DsaAttemptsPage />,
+    "dsa-recs":      <DsaProblemRecsPage />,
     recommendations: <RecommendationsPage />,
     roadmap:         <RoadmapPage />,
     profile:         <ProfilePage />,

@@ -61,6 +61,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/roadmap/**").authenticated()
                 .requestMatchers("/api/dashboard/**").authenticated()
                 .requestMatchers("/api/user/**").authenticated()
+                .requestMatchers("/api/dsa/**").authenticated()
 
                 // ── Catch-all ────────────────────────────────────────────────
                 .anyRequest().authenticated()

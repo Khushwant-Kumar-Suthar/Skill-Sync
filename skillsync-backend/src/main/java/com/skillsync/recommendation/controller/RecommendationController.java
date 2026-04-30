@@ -5,7 +5,9 @@ import org.springframework.web.bind.annotation.*;
 
 import com.skillsync.common.response.ApiResponse;
 import com.skillsync.common.util.ResponseUtil;
+import com.skillsync.recommendation.dto.ProblemRecommendationDTO;
 import com.skillsync.recommendation.dto.RecommendationDTO;
+import com.skillsync.recommendation.service.ProblemRecommendationService;
 import com.skillsync.recommendation.service.RecommendationService;
 
 import java.util.List;
@@ -16,6 +18,7 @@ import java.util.List;
 public class RecommendationController {
 
     private final RecommendationService recommendationService;
+    private final ProblemRecommendationService problemRecommendationService;
 
     /**
      * GET /api/recommendations
@@ -27,5 +30,15 @@ public class RecommendationController {
                 recommendationService.getRecommendations();
         return ResponseUtil.success("Recommendations fetched successfully",
                 recommendations);
+    }
+
+    /**
+     * GET /api/recommendations/problems
+     * Returns a prioritised list of problem recommendations for the logged-in user.
+     */
+    @GetMapping("/problems")
+    public ApiResponse<List<ProblemRecommendationDTO>> getProblemRecommendations() {
+        return ResponseUtil.success("Problem recommendations fetched successfully",
+                problemRecommendationService.recommendProblems());
     }
 }

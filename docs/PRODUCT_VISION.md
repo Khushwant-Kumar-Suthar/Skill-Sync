@@ -28,8 +28,7 @@ Two output types:
 - **Next practice**: problems to solve next (spaced repetition + weaknesses)
 - **Next learning**: what to study/build next (prerequisite-aware)
 
-## MVP milestones (suggested)
-
+## MVP milestones 
 - **MVP-1**: CRUD for skills + DSA problems + attempts + simple recommendations
 - **MVP-2**: learning paths + tagging/patterns + better analytics dashboards
 - **MVP-3**: imports (LeetCode/Codeforces/GitHub), smarter ranking, streaks, reminders

@@ -1,15 +1,21 @@
 package com.skillsync.skill.controller;
 
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.skillsync.common.response.ApiResponse;
 import com.skillsync.common.util.ResponseUtil;
 import com.skillsync.skill.dto.SkillRequestDTO;
 import com.skillsync.skill.dto.SkillResponseDTO;
 import com.skillsync.skill.service.SkillService;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/skills")

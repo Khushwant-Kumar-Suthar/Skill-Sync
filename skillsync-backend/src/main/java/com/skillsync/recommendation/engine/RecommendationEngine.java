@@ -1,12 +1,13 @@
 package com.skillsync.recommendation.engine;
 
-import com.skillsync.skill.progress.entity.UserSkillProgress;
-import com.skillsync.recommendation.dto.RecommendationDTO;
-import org.springframework.stereotype.Component;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+
+import org.springframework.stereotype.Component;
+
+import com.skillsync.recommendation.dto.RecommendationDTO;
+import com.skillsync.skill.progress.entity.UserSkillProgress;
 
 /**
  * Rule-based recommendation engine.

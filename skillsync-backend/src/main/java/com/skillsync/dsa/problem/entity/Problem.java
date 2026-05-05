@@ -1,13 +1,27 @@
 package com.skillsync.dsa.problem.entity;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.skillsync.common.util.BaseEntity;
 import com.skillsync.dsa.common.Difficulty;
 import com.skillsync.dsa.tag.entity.Tag;
-import jakarta.persistence.*;
-import lombok.*;
 
-import java.util.HashSet;
-import java.util.Set;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(

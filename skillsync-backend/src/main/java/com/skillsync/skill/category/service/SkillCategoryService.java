@@ -1,5 +1,5 @@
 package com.skillsync.skill.category.service;
-import java.util.*;
+import java.util.List;
 
 import com.skillsync.skill.category.dto.SkillCategoryRequest;
 import com.skillsync.skill.category.dto.SkillCategoryResponse;

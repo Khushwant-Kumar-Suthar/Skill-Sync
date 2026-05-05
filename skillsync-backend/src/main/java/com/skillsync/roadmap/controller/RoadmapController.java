@@ -1,14 +1,22 @@
 package com.skillsync.roadmap.controller;
 
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.skillsync.common.response.ApiResponse;
 import com.skillsync.common.util.ResponseUtil;
 import com.skillsync.roadmap.dto.GenerateRoadmapRequest;
 import com.skillsync.roadmap.dto.RoadmapResponse;
 import com.skillsync.roadmap.service.RoadmapService;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/roadmap")
@@ -63,5 +71,17 @@ public class RoadmapController {
 
         roadmapService.markStepCompleted(stepId);
         return ResponseUtil.successMessage("Step marked as completed");
+    }
+
+    @DeleteMapping("/steps/{stepId}")
+    public ApiResponse<Void> deleteStep(@PathVariable Long stepId) {
+        roadmapService.deleteStep(stepId);
+        return ResponseUtil.successMessage("Roadmap step deleted successfully");
+    }
+
+    @DeleteMapping
+    public ApiResponse<Void> clearRoadmap() {
+        roadmapService.clearRoadmap();
+        return ResponseUtil.successMessage("Roadmap cleared successfully");
     }
 }

@@ -1,6 +1,7 @@
 package com.skillsync.common.config;
 
-import lombok.RequiredArgsConstructor;
+import java.time.LocalDateTime;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -25,8 +26,7 @@ import com.skillsync.skill.repository.SkillRepository;
 import com.skillsync.user.entity.User;
 import com.skillsync.user.repository.UserRepository;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 /**
  * Seeds demo data on application startup.

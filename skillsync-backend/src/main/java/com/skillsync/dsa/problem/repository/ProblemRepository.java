@@ -1,14 +1,17 @@
 package com.skillsync.dsa.problem.repository;
 
-import com.skillsync.dsa.common.Difficulty;
-import com.skillsync.dsa.problem.entity.Problem;
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.skillsync.dsa.common.Difficulty;
+import com.skillsync.dsa.problem.entity.Problem;
+
 public interface ProblemRepository extends JpaRepository<Problem, Long> {
     Optional<Problem> findBySlug(String slug);
+
+    boolean existsBySlug(String slug);
 
     List<Problem> findByDifficultyOrderByTitleAsc(Difficulty difficulty);
 

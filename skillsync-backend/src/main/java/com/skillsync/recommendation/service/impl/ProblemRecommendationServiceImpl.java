@@ -1,5 +1,15 @@
 package com.skillsync.recommendation.service.impl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+
 import com.skillsync.common.exception.ResourceNotFoundException;
 import com.skillsync.dsa.attempt.entity.Attempt;
 import com.skillsync.dsa.attempt.repository.AttemptRepository;
@@ -11,11 +21,8 @@ import com.skillsync.recommendation.dto.ProblemRecommendationDTO;
 import com.skillsync.recommendation.service.ProblemRecommendationService;
 import com.skillsync.user.entity.User;
 import com.skillsync.user.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
 
-import java.util.*;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

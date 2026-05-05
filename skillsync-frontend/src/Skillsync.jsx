@@ -98,7 +98,85 @@ const styles = `
   }
 
   /* ── Layout ── */
-  .app-shell { display: flex; min-height: 100vh; }
+  .app-shell {
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  .app-shell.light {
+    --bg:        #f5f7fb;
+    --bg2:       #ffffff;
+    --bg3:       #eef2f7;
+    --border:    #d8e0ea;
+    --border2:   #b8c4d3;
+    --text:      #121826;
+    --text2:     #4b5565;
+    --text3:     #778398;
+    --shadow:    0 12px 34px rgba(15,23,42,0.10);
+    --shadow2:   0 4px 18px rgba(15,23,42,0.08);
+  }
+
+  .topbar {
+    height: 64px;
+    position: sticky; top: 0; z-index: 500;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    padding: 0 28px;
+    background: color-mix(in srgb, var(--bg2) 92%, transparent);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(14px);
+  }
+  .topbar-left, .topbar-actions { display: flex; align-items: center; gap: 12px; }
+  .icon-btn {
+    width: 40px; height: 40px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: var(--radius2);
+    border: 1px solid var(--border);
+    background: var(--bg3);
+    color: var(--text);
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 18px;
+  }
+  .icon-btn:hover { border-color: var(--border2); transform: translateY(-1px); }
+  .hamburger-lines { display: grid; gap: 4px; width: 18px; }
+  .hamburger-lines span { display: block; height: 2px; border-radius: 99px; background: currentColor; }
+  .topbar-brand { min-width: 0; }
+  .topbar-title { font-family: var(--font-head); font-size: 18px; font-weight: 800; color: var(--text); }
+  .topbar-sub { font-size: 11px; color: var(--text3); line-height: 1.1; }
+  .topbar-profile { position: relative; }
+  .profile-menu {
+    position: absolute; top: calc(100% + 10px); right: 0;
+    width: 230px;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 8px;
+    z-index: 700;
+  }
+  .profile-menu-head { padding: 10px 10px 12px; border-bottom: 1px solid var(--border); margin-bottom: 6px; }
+  .profile-menu-name { font-size: 13px; font-weight: 700; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .profile-menu-role { font-size: 11px; color: var(--text3); }
+  .profile-menu-item {
+    width: 100%;
+    padding: 10px;
+    border-radius: var(--radius2);
+    border: none;
+    background: transparent;
+    color: var(--text2);
+    text-align: left;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 13px;
+  }
+  .profile-menu-item:hover { background: var(--bg3); color: var(--text); }
+  .profile-menu-item.danger { color: var(--red); }
+  .drawer-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.48);
+    z-index: 590;
+  }
 
   .sidebar {
     width: 240px; flex-shrink: 0;
@@ -106,7 +184,12 @@ const styles = `
     border-right: 1px solid var(--border);
     display: flex; flex-direction: column;
     position: fixed; top: 0; left: 0; bottom: 0;
-    z-index: 100; transition: var(--transition);
+    z-index: 600; transition: var(--transition);
+    transform: translateX(-100%);
+    box-shadow: var(--shadow);
+  }
+  .sidebar.open {
+    transform: translateX(0);
   }
   .sidebar-logo {
     padding: 28px 24px 20px;
@@ -166,9 +249,8 @@ const styles = `
   .user-role { font-size: 11px; color: var(--text3); }
 
   .main-content {
-    margin-left: 240px; flex: 1;
     padding: 32px;
-    min-height: 100vh;
+    min-height: calc(100vh - 64px);
     background: var(--bg);
   }
 
@@ -218,8 +300,10 @@ const styles = `
   .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
   @media (max-width: 900px) {
     .grid-2, .grid-3 { grid-template-columns: 1fr; }
-    .sidebar { transform: translateX(-100%); }
-    .main-content { margin-left: 0; }
+    .topbar { padding: 0 16px; }
+    .topbar-sub { display: none; }
+    .main-content { padding: 20px 16px; }
+    .btn-create-label { display: none; }
   }
 
   /* ── Progress Bar ── */
@@ -522,6 +606,13 @@ const tagChips = (tags) => {
   );
 };
 
+const externalHref = (url) => {
+  if (!url) return "";
+  const trimmed = url.trim();
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed.replace(/^\/+/, "")}`;
+};
+
 // ─── Auth Page ────────────────────────────────────────────────────────────────
 function AuthPage() {
   const { login } = useAuth();
@@ -813,6 +904,8 @@ function RecommendationsPage() {
 
 // ─── DSA — Problems Page ───────────────────────────────────────────────────────
 function DsaProblemsPage() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === "ADMIN";
   const [problems, setProblems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [plan, setPlan] = useState("normal");
@@ -822,6 +915,15 @@ function DsaProblemsPage() {
   const [tag, setTag] = useState("");
   const [selected, setSelected] = useState(null);
   const [attemptForm, setAttemptForm] = useState({ status: "TODO", language: "Java", notes: "" });
+  const [showCreate, setShowCreate] = useState(false);
+  const [problemForm, setProblemForm] = useState({
+    title: "",
+    slug: "",
+    difficulty: "EASY",
+    description: "",
+    sourceUrl: "",
+    tags: "",
+  });
   const [saving, setSaving] = useState(false);
 
   const load = useCallback(() => {
@@ -880,12 +982,42 @@ function DsaProblemsPage() {
     }
   };
 
+  const createProblem = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const payload = {
+        ...problemForm,
+        slug: problemForm.slug || undefined,
+        tags: problemForm.tags
+          .split(",")
+          .map(t => t.trim())
+          .filter(Boolean),
+      };
+      await api.post("/problems", payload);
+      toast.success("Problem uploaded!");
+      setShowCreate(false);
+      setProblemForm({ title: "", slug: "", difficulty: "EASY", description: "", sourceUrl: "", tags: "" });
+      load();
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="fade-in">
       <div className="page-header">
         <div className="page-title">DSA Problems</div>
         <div className="page-sub">Browse the 300-question set and track your attempts</div>
       </div>
+
+      {isAdmin && (
+        <div style={{ marginBottom: 20 }}>
+          <button className="btn btn-primary" onClick={() => setShowCreate(true)}>+ Upload Question</button>
+        </div>
+      )}
 
       <div className="card" style={{ marginBottom: 20 }}>
         <div className="form-row">
@@ -978,7 +1110,7 @@ function DsaProblemsPage() {
                     <td>{tagChips(Array.from(p.tags || []))}</td>
                     <td>
                       {p.sourceUrl ? (
-                        <a href={p.sourceUrl} target="_blank" rel="noreferrer" style={{ color: "var(--blue)" }} onClick={e => e.stopPropagation()}>
+                        <a href={externalHref(p.sourceUrl)} target="_blank" rel="noreferrer" style={{ color: "var(--blue)" }} onClick={e => e.stopPropagation()}>
                           Open
                         </a>
                       ) : "—"}
@@ -1038,6 +1170,58 @@ function DsaProblemsPage() {
                 <button type="button" className="btn btn-secondary" onClick={() => setSelected(null)}>Cancel</button>
                 <button className="btn btn-primary" type="submit" disabled={saving}>
                   {saving ? <span className="spinner" /> : "Save Attempt"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showCreate && (
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setShowCreate(false)}>
+          <div className="modal-box" style={{ maxWidth: 640 }}>
+            <div className="modal-title">Upload DSA Question</div>
+            <form onSubmit={createProblem}>
+              <div className="form-group">
+                <label className="form-label">Title</label>
+                <input className="form-input" value={problemForm.title}
+                  onChange={e => setProblemForm(f => ({ ...f, title: e.target.value }))} required />
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Slug</label>
+                  <input className="form-input" placeholder="auto-generated if blank" value={problemForm.slug}
+                    onChange={e => setProblemForm(f => ({ ...f, slug: e.target.value }))} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Difficulty</label>
+                  <select className="form-select" value={problemForm.difficulty}
+                    onChange={e => setProblemForm(f => ({ ...f, difficulty: e.target.value }))}>
+                    <option>EASY</option>
+                    <option>MEDIUM</option>
+                    <option>HARD</option>
+                  </select>
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Source URL</label>
+                <input className="form-input" value={problemForm.sourceUrl}
+                  onChange={e => setProblemForm(f => ({ ...f, sourceUrl: e.target.value }))} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Tags</label>
+                <input className="form-input" placeholder="TOPIC:Array, PATTERN:Two Pointers, COMPANY:Google"
+                  value={problemForm.tags} onChange={e => setProblemForm(f => ({ ...f, tags: e.target.value }))} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Description</label>
+                <textarea className="form-textarea" value={problemForm.description}
+                  onChange={e => setProblemForm(f => ({ ...f, description: e.target.value }))} />
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setShowCreate(false)}>Cancel</button>
+                <button className="btn btn-primary" type="submit" disabled={saving}>
+                  {saving ? <span className="spinner" /> : "Upload"}
                 </button>
               </div>
             </form>
@@ -1207,6 +1391,40 @@ function RoadmapPage() {
     }
   };
 
+  const deleteStep = async (stepId) => {
+    if (!confirm("Delete this roadmap step?")) return;
+    try {
+      await api.delete(`/roadmap/steps/${stepId}`);
+      toast.success("Roadmap step deleted.");
+      setRoadmap(prev => {
+        if (!prev?.steps) return prev;
+        const steps = prev.steps.filter(step => step.stepId !== stepId);
+        const completedSteps = steps.filter(step => step.completed).length;
+        return {
+          ...prev,
+          steps,
+          totalSteps: steps.length,
+          completedSteps,
+          overallProgressPercent: steps.length
+            ? Math.round((completedSteps * 1000) / steps.length) / 10
+            : 0,
+        };
+      });
+    } catch (err) {
+      toast.error(err.message);
+    }
+  };
+
+  const clearRoadmap = async () => {
+    if (!confirm("Clear your entire roadmap?")) return;
+    try {
+      await api.delete("/roadmap");
+      toast.success("Roadmap cleared.");
+      setRoadmap(null);
+    } catch (err) {
+      toast.error(err.message);
+    }
+  };
   if (loading) return <div className="loading-page"><div className="spinner" /><span>Loading roadmap…</span></div>;
 
   return (
@@ -1228,6 +1446,9 @@ function RoadmapPage() {
           <button className="btn btn-primary" onClick={generate} disabled={generating}>
             {generating ? <span className="spinner" /> : "🗺️"} Regenerate Roadmap
           </button>
+          {roadmap?.steps?.length > 0 && (
+            <button className="btn btn-danger" onClick={clearRoadmap}>Clear All</button>
+          )}
           {roadmap && (
             <div style={{ marginLeft: "auto", textAlign: "right" }}>
               <div style={{ fontSize: 12, color: "var(--text3)", marginBottom: 4 }}>
@@ -1270,6 +1491,9 @@ function RoadmapPage() {
                     </button>
                   )}
                   {step.completed && <span className="badge badge-green">Completed ✓</span>}
+                  <button className="btn btn-sm btn-danger" onClick={() => deleteStep(step.stepId)}>
+                    Delete
+                  </button>
                 </div>
               </div>
             </div>
@@ -1617,6 +1841,8 @@ function AdminCategoriesPage() {
 function AdminUsersPage() {
   const [stats, setStats]   = useState(null);
   const [users, setUsers]   = useState([]);
+  const [roadmaps, setRoadmaps] = useState([]);
+  const [progress, setProgress] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage]     = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -1625,9 +1851,13 @@ function AdminUsersPage() {
     Promise.all([
       api.get("/admin/stats"),
       api.get(`/admin/users?page=${page}&size=10&sortBy=name`),
-    ]).then(([sRes, uRes]) => {
+      api.get("/admin/roadmaps"),
+      api.get("/admin/progress"),
+    ]).then(([sRes, uRes, rRes, pRes]) => {
       setStats(sRes.data);
       setUsers(uRes.data?.content || []);
+      setRoadmaps(rRes.data || []);
+      setProgress(pRes.data || []);
       setTotalPages(uRes.data?.totalPages || 1);
       setLoading(false);
     }).catch(() => setLoading(false));
@@ -1732,13 +1962,83 @@ function AdminUsersPage() {
           </div>
         )}
       </div>
+
+      <div className="section-title" style={{ marginTop: 28 }}>User Roadmaps <div className="line" /></div>
+      <div className="grid-2">
+        {roadmaps.length === 0 ? (
+          <div className="card empty-state">
+            <div className="empty-title">No generated roadmaps</div>
+          </div>
+        ) : roadmaps.map(r => (
+          <div key={r.userId} className="card">
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 12, marginBottom: 12 }}>
+              <div>
+                <div style={{ fontWeight: 700, color: "var(--text)" }}>{r.userName}</div>
+                <div style={{ fontSize: 12, color: "var(--text3)" }}>{r.userEmail}</div>
+              </div>
+              <span className="badge badge-blue">{r.completedSteps}/{r.totalSteps} done</span>
+            </div>
+            <div className="progress-bar-wrap" style={{ marginBottom: 12 }}>
+              <div className="progress-bar-fill" style={{ width: `${r.overallProgressPercent}%` }} />
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {(r.steps || []).slice(0, 5).map(step => (
+                <div key={step.stepId} style={{ fontSize: 12, color: "var(--text2)", display: "flex", justifyContent: "space-between", gap: 8 }}>
+                  <span>{step.stepOrder}. {step.skillName}</span>
+                  <span>{step.completed ? "Done" : "Open"}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="section-title" style={{ marginTop: 28 }}>Skill Progress by Category <div className="line" /></div>
+      <div className="card" style={{ padding: 0 }}>
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Category</th>
+                <th>Skill</th>
+                <th>Progress</th>
+                <th>Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              {progress.length === 0 ? (
+                <tr><td colSpan={5} style={{ textAlign: "center", color: "var(--text3)", padding: "32px 0" }}>No progress logged yet</td></tr>
+              ) : progress.map((p, i) => (
+                <tr key={`${p.userId}-${p.skillId}-${i}`}>
+                  <td>
+                    <div style={{ fontWeight: 500, color: "var(--text)" }}>{p.userName}</div>
+                    <div style={{ fontSize: 12, color: "var(--text3)" }}>{p.userEmail}</div>
+                  </td>
+                  <td>{p.categoryName}</td>
+                  <td>{p.skillName}</td>
+                  <td>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div className="progress-bar-wrap" style={{ width: 90 }}>
+                        <div className="progress-bar-fill" style={{ width: `${p.progressPercentage}%` }} />
+                      </div>
+                      <span style={{ fontSize: 12 }}>{p.progressPercentage}%</span>
+                    </div>
+                  </td>
+                  <td>{p.score}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
-function Sidebar({ current, navigate }) {
-  const { user, logout } = useAuth();
+function Sidebar({ current, navigate, open, onClose }) {
+  const { user } = useAuth();
   const isAdmin = user?.role === "ADMIN";
 
   const userNav = [
@@ -1759,7 +2059,7 @@ function Sidebar({ current, navigate }) {
   ];
 
   return (
-    <nav className="sidebar">
+    <nav className={`sidebar ${open ? "open" : ""}`}>
       <div className="sidebar-logo">
         <div className="logo-text">SkillSync</div>
         <div className="logo-sub">Developer Skill Tracker</div>
@@ -1769,7 +2069,7 @@ function Sidebar({ current, navigate }) {
         <div className="nav-section-label">Main</div>
         {userNav.map(n => (
           <button key={n.id} className={`nav-item ${current === n.id ? "active" : ""}`}
-            onClick={() => navigate(n.id)}>
+            onClick={() => { navigate(n.id); onClose(); }}>
             <span className="nav-icon">{n.icon}</span>
             {n.label}
           </button>
@@ -1780,7 +2080,7 @@ function Sidebar({ current, navigate }) {
             <div className="nav-section-label" style={{ marginTop: 8 }}>Admin</div>
             {adminNav.map(n => (
               <button key={n.id} className={`nav-item ${current === n.id ? "active" : ""}`}
-                onClick={() => navigate(n.id)}>
+                onClick={() => { navigate(n.id); onClose(); }}>
                 <span className="nav-icon">{n.icon}</span>
                 {n.label}
               </button>
@@ -1790,24 +2090,85 @@ function Sidebar({ current, navigate }) {
       </div>
 
       <div className="sidebar-footer">
-        <div className="user-card" onClick={() => navigate("profile")}>
+        <div className="user-card" onClick={() => { navigate("profile"); onClose(); }}>
           <div className="user-avatar">{user?.email?.[0]?.toUpperCase()}</div>
           <div className="user-info">
             <div className="user-name">{user?.email}</div>
             <div className="user-role">{user?.role}</div>
           </div>
         </div>
-        <button className="btn btn-secondary btn-sm" style={{ width: "100%", marginTop: 8 }} onClick={logout}>
-          Sign out
-        </button>
       </div>
     </nav>
+  );
+}
+
+function TopBar({ onMenu, navigate, theme, toggleTheme }) {
+  const { user, logout } = useAuth();
+  const [profileOpen, setProfileOpen] = useState(false);
+  const isAdmin = user?.role === "ADMIN";
+
+  const goProfile = () => {
+    navigate("profile");
+    setProfileOpen(false);
+  };
+
+  const createTarget = () => {
+    navigate(isAdmin ? "admin-skills" : "roadmap");
+    setProfileOpen(false);
+  };
+
+  return (
+    <header className="topbar">
+      <div className="topbar-left">
+        <button className="icon-btn" onClick={onMenu} title="Open menu" aria-label="Open menu">
+          <span className="hamburger-lines"><span /><span /><span /></span>
+        </button>
+        <div className="topbar-brand">
+          <div className="topbar-title">SkillSync</div>
+          <div className="topbar-sub">Developer Skill Tracker</div>
+        </div>
+      </div>
+
+      <div className="topbar-actions">
+        <button className="btn btn-primary btn-sm" onClick={createTarget}>
+          <span>+</span><span className="btn-create-label">{isAdmin ? "Create" : "Create Roadmap"}</span>
+        </button>
+        <button className="icon-btn" onClick={toggleTheme} title="Toggle theme" aria-label="Toggle theme">
+          {theme === "dark" ? "L" : "D"}
+        </button>
+        <div className="topbar-profile">
+          <button className="icon-btn user-avatar" onClick={() => setProfileOpen(v => !v)} title="Profile" aria-label="Profile menu">
+            {user?.email?.[0]?.toUpperCase()}
+          </button>
+          {profileOpen && (
+            <div className="profile-menu">
+              <div className="profile-menu-head">
+                <div className="profile-menu-name">{user?.email}</div>
+                <div className="profile-menu-role">{user?.role}</div>
+              </div>
+              <button className="profile-menu-item" onClick={goProfile}>Change password</button>
+              <button className="profile-menu-item danger" onClick={logout}>Logout</button>
+            </div>
+          )}
+        </div>
+      </div>
+    </header>
   );
 }
 
 // ─── App Shell ────────────────────────────────────────────────────────────────
 function AppShell() {
   const [page, setPage] = useState("dashboard");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [theme, setTheme] = useState(() => localStorage.getItem("theme") || "dark");
+
+  const toggleTheme = () => {
+    setTheme(current => {
+      const next = current === "dark" ? "light" : "dark";
+      localStorage.setItem("theme", next);
+      return next;
+    });
+  };
 
   const pages = {
     dashboard:       <DashboardPage />,
@@ -1824,8 +2185,20 @@ function AppShell() {
   };
 
   return (
-    <div className="app-shell">
-      <Sidebar current={page} navigate={setPage} />
+    <div className={`app-shell ${theme === "light" ? "light" : ""}`}>
+      <TopBar
+        onMenu={() => setMenuOpen(true)}
+        navigate={setPage}
+        theme={theme}
+        toggleTheme={toggleTheme}
+      />
+      {menuOpen && <div className="drawer-backdrop" onClick={() => setMenuOpen(false)} />}
+      <Sidebar
+        current={page}
+        navigate={setPage}
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+      />
       <main className="main-content">
         {pages[page] || <DashboardPage />}
       </main>

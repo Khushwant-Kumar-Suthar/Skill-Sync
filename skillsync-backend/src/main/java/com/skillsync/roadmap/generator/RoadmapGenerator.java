@@ -1,13 +1,14 @@
 package com.skillsync.roadmap.generator;
 
-import com.skillsync.roadmap.entity.RoadmapStep;
-import com.skillsync.skill.progress.entity.UserSkillProgress;
-import com.skillsync.user.entity.User;
-import org.springframework.stereotype.Component;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+
+import org.springframework.stereotype.Component;
+
+import com.skillsync.roadmap.entity.RoadmapStep;
+import com.skillsync.skill.progress.entity.UserSkillProgress;
+import com.skillsync.user.entity.User;
 
 /**
  * Generates an ordered learning roadmap from the user's skill progress.

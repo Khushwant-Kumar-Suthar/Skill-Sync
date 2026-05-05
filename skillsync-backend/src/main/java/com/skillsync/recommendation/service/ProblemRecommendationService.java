@@ -1,8 +1,8 @@
 package com.skillsync.recommendation.service;
 
-import com.skillsync.recommendation.dto.ProblemRecommendationDTO;
-
 import java.util.List;
+
+import com.skillsync.recommendation.dto.ProblemRecommendationDTO;
 
 public interface ProblemRecommendationService {
     List<ProblemRecommendationDTO> recommendProblems();

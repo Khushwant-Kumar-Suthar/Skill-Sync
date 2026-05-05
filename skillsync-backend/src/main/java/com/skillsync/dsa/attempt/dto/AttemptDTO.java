@@ -1,6 +1,7 @@
 package com.skillsync.dsa.attempt.dto;
 
 import com.skillsync.dsa.common.AttemptStatus;
+
 import lombok.Builder;
 import lombok.Getter;
 

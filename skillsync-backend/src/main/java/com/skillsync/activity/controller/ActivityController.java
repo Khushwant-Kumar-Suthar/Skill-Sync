@@ -1,13 +1,17 @@
 package com.skillsync.activity.controller;
 
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.skillsync.activity.dto.request.ActivityRequest;
 import com.skillsync.activity.service.ActivityService;
 import com.skillsync.common.response.ApiResponse;
 import com.skillsync.common.util.ResponseUtil;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/activities")

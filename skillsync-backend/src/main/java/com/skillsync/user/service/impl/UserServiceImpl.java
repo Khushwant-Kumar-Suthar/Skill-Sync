@@ -1,6 +1,5 @@
 package com.skillsync.user.service.impl;
 
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,6 +15,8 @@ import com.skillsync.user.dto.UserProfileDTO;
 import com.skillsync.user.entity.User;
 import com.skillsync.user.repository.UserRepository;
 import com.skillsync.user.service.UserService;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

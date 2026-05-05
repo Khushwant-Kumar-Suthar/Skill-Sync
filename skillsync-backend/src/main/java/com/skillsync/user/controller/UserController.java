@@ -1,8 +1,10 @@
 package com.skillsync.user.controller;
 
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.skillsync.common.response.ApiResponse;
 import com.skillsync.common.util.ResponseUtil;
@@ -10,6 +12,9 @@ import com.skillsync.user.dto.ChangePasswordRequest;
 import com.skillsync.user.dto.UpdateProfileRequest;
 import com.skillsync.user.dto.UserProfileDTO;
 import com.skillsync.user.service.UserService;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/user")

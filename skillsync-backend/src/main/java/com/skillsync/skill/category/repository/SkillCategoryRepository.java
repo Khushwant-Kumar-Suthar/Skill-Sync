@@ -1,11 +1,11 @@
 package com.skillsync.skill.category.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import com.skillsync.skill.category.entity.SkillCategory;
-
-import java.util.List;
 
 public interface SkillCategoryRepository
         extends JpaRepository<SkillCategory, Long> {

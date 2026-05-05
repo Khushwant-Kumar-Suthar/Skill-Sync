@@ -1,6 +1,6 @@
 package com.skillsync.skill.service;
 
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
 
 import com.skillsync.skill.dto.SkillRequestDTO;
 import com.skillsync.skill.dto.SkillResponseDTO;

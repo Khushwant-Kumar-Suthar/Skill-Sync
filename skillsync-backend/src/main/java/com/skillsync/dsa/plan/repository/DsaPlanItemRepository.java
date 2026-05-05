@@ -1,12 +1,13 @@
 package com.skillsync.dsa.plan.repository;
 
-import com.skillsync.dsa.plan.entity.DsaPlan;
-import com.skillsync.dsa.plan.entity.DsaPlanItem;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
+import com.skillsync.dsa.plan.entity.DsaPlan;
+import com.skillsync.dsa.plan.entity.DsaPlanItem;
 
 public interface DsaPlanItemRepository extends JpaRepository<DsaPlanItem, Long> {
 

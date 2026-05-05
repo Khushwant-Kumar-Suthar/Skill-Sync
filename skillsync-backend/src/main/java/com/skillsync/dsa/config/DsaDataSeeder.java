@@ -1,5 +1,22 @@
 package com.skillsync.dsa.config;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.skillsync.dsa.common.Difficulty;
 import com.skillsync.dsa.common.TagType;
 import com.skillsync.dsa.plan.entity.DsaPlan;
@@ -10,15 +27,8 @@ import com.skillsync.dsa.problem.entity.Problem;
 import com.skillsync.dsa.problem.repository.ProblemRepository;
 import com.skillsync.dsa.tag.entity.Tag;
 import com.skillsync.dsa.tag.repository.TagRepository;
-import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import lombok.RequiredArgsConstructor;
 
 /**
  * Seeds ~300 DSA problems for development/demo.
@@ -95,7 +105,7 @@ public class DsaDataSeeder implements CommandLineRunner {
             };
 
             String slug = uniqueSlug(slugify(title), usedSlugs);
-            String sourceUrl = "https://leetcode.com/problems/" + slug + "/";
+            String sourceUrl = "https://leetcode.com/problemset/" + slug + "/";
 
             Set<Tag> tags = new HashSet<>();
             tags.add(topicTags.get(topic));

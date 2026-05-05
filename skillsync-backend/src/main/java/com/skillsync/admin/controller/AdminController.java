@@ -1,14 +1,25 @@
 package com.skillsync.admin.controller;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.skillsync.admin.dto.AdminRoadmapDTO;
+import com.skillsync.admin.dto.AdminSkillProgressDTO;
 import com.skillsync.admin.dto.AdminStatsDTO;
 import com.skillsync.admin.dto.AdminUserDTO;
 import com.skillsync.admin.service.AdminService;
 import com.skillsync.common.response.ApiResponse;
 import com.skillsync.common.util.ResponseUtil;
+
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -41,6 +52,20 @@ public class AdminController {
         return ResponseUtil.success(
                 "Platform stats fetched successfully",
                 adminService.getPlatformStats());
+    }
+
+    @GetMapping("/roadmaps")
+    public ApiResponse<List<AdminRoadmapDTO>> getAllRoadmaps() {
+        return ResponseUtil.success(
+                "Roadmaps fetched successfully",
+                adminService.getAllRoadmaps());
+    }
+
+    @GetMapping("/progress")
+    public ApiResponse<List<AdminSkillProgressDTO>> getAllSkillProgress() {
+        return ResponseUtil.success(
+                "Skill progress fetched successfully",
+                adminService.getAllSkillProgress());
     }
 
     /**

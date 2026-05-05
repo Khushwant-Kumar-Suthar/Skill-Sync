@@ -1,12 +1,15 @@
 package com.skillsync.dashboard.controller;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.skillsync.common.response.ApiResponse;
 import com.skillsync.common.util.ResponseUtil;
 import com.skillsync.dashboard.dto.DashboardResponse;
 import com.skillsync.dashboard.service.DashboardService;
+
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/dashboard")

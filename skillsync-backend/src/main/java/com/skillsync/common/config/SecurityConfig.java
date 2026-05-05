@@ -1,19 +1,21 @@
 package com.skillsync.common.config;
 
-import lombok.RequiredArgsConstructor;
-
 import org.modelmapper.ModelMapper;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.*;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.skillsync.common.security.JwtAuthenticationFilter;
+
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @RequiredArgsConstructor
@@ -51,8 +53,9 @@ public class SecurityConfig {
 
                 // ── Admin only ───────────────────────────────────────────────
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/categories/**").hasRole("ADMIN")
-                .requestMatchers("/api/skills/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/categories/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/skills/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/problems/**").hasRole("ADMIN")
 
                 // ── Authenticated users ──────────────────────────────────────
                 .requestMatchers("/api/activities/**").authenticated()
@@ -62,6 +65,10 @@ public class SecurityConfig {
                 .requestMatchers("/api/dashboard/**").authenticated()
                 .requestMatchers("/api/user/**").authenticated()
                 .requestMatchers("/api/dsa/**").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/categories/**").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/skills/**").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/problems/**").authenticated()
+                .requestMatchers("/api/attempts/**").authenticated()
 
                 // ── Catch-all ────────────────────────────────────────────────
                 .anyRequest().authenticated()

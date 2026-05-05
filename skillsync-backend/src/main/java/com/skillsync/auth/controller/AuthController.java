@@ -1,8 +1,9 @@
 package com.skillsync.auth.controller;
 
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.skillsync.auth.dto.AuthResponseDto;
 import com.skillsync.auth.dto.LoginRequest;
@@ -10,6 +11,9 @@ import com.skillsync.auth.dto.RegisterRequest;
 import com.skillsync.auth.service.AuthService;
 import com.skillsync.common.response.ApiResponse;
 import com.skillsync.common.util.ResponseUtil;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/auth")

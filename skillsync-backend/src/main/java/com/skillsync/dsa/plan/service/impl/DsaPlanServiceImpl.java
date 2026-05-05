@@ -1,5 +1,12 @@
 package com.skillsync.dsa.plan.service.impl;
 
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+
 import com.skillsync.common.exception.ResourceNotFoundException;
 import com.skillsync.dsa.attempt.repository.AttemptRepository;
 import com.skillsync.dsa.common.AttemptStatus;
@@ -8,18 +15,13 @@ import com.skillsync.dsa.plan.dto.PlanProgressDTO;
 import com.skillsync.dsa.plan.entity.DsaPlan;
 import com.skillsync.dsa.plan.repository.DsaPlanItemRepository;
 import com.skillsync.dsa.plan.repository.DsaPlanRepository;
+import com.skillsync.dsa.plan.service.DsaPlanService;
 import com.skillsync.dsa.problem.dto.ProblemDTO;
 import com.skillsync.dsa.problem.entity.Problem;
-import com.skillsync.dsa.plan.service.DsaPlanService;
 import com.skillsync.user.entity.User;
 import com.skillsync.user.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

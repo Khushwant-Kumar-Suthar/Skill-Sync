@@ -16,4 +16,10 @@ public interface RoadmapService {
 
     /** Marks a single roadmap step as completed. */
     void markStepCompleted(Long stepId);
+
+    /** Deletes one step from the current user's roadmap. */
+    void deleteStep(Long stepId);
+
+    /** Deletes every roadmap step for the current user. */
+    void clearRoadmap();
 }

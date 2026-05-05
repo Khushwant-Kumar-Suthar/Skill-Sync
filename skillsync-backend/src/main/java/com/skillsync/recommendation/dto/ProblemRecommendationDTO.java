@@ -1,10 +1,11 @@
 package com.skillsync.recommendation.dto;
 
+import java.util.Set;
+
 import com.skillsync.dsa.common.Difficulty;
+
 import lombok.Builder;
 import lombok.Getter;
-
-import java.util.Set;
 
 @Getter
 @Builder

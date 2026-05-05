@@ -1,10 +1,11 @@
 package com.skillsync.dsa.tag.repository;
 
-import com.skillsync.dsa.common.TagType;
-import com.skillsync.dsa.tag.entity.Tag;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.Optional;
+import com.skillsync.dsa.common.TagType;
+import com.skillsync.dsa.tag.entity.Tag;
 
 public interface TagRepository extends JpaRepository<Tag, Long> {
     Optional<Tag> findByTypeAndNameIgnoreCase(TagType type, String name);

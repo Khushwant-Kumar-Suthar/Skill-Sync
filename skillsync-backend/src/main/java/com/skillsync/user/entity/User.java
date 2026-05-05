@@ -1,16 +1,27 @@
 package com.skillsync.user.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.skillsync.activity.entity.ActivityLog;
 import com.skillsync.common.constant.Role;
 import com.skillsync.common.util.BaseEntity;
 import com.skillsync.roadmap.entity.RoadmapStep;
 import com.skillsync.skill.progress.entity.UserSkillProgress;
 
-import jakarta.persistence.*;
-import lombok.*;
-
-import java.util.ArrayList;
-import java.util.List;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "users")

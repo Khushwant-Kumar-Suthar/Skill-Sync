@@ -1,13 +1,14 @@
 package com.skillsync.common.security;
 
-import lombok.AllArgsConstructor;
+import java.util.Collection;
+import java.util.List;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.skillsync.user.entity.User;
 
-import java.util.Collection;
-import java.util.List;
+import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public class CustomUserDetails implements UserDetails {

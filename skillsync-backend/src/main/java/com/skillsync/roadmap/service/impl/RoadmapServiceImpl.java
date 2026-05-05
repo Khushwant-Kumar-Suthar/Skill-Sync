@@ -1,6 +1,9 @@
 package com.skillsync.roadmap.service.impl;
 
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,9 +24,7 @@ import com.skillsync.skill.progress.repository.UserSkillProgressRepository;
 import com.skillsync.user.entity.User;
 import com.skillsync.user.repository.UserRepository;
 
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -40,30 +41,14 @@ public class RoadmapServiceImpl implements RoadmapService {
     // ── Public API ────────────────────────────────────────────────────────────
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public RoadmapResponse getRoadmap() {
 
         User user = getCurrentUser();
         log.info("Fetching roadmap for user: {}", user.getEmail());
 
-        List<UserSkillProgress> progressList =
-                progressRepository.findByUserWithSkill(user);
-
         List<RoadmapStep> steps =
                 roadmapStepRepository.findByUserOrderByStepOrder(user);
-
-        boolean roadmapIsStale = isRoadmapStale(steps, progressList);
-
-        if (steps.isEmpty() || roadmapIsStale) {
-            if (!progressList.isEmpty()) {
-                log.info("Regenerating roadmap for user: {} (stale={})",
-                        user.getEmail(), roadmapIsStale);
-                roadmapStepRepository.deleteAllByUser(user);
-                // Default 60 min/day when auto-generating
-                steps = roadmapGenerator.generate(user, progressList, 60);
-                roadmapStepRepository.saveAll(steps);
-            }
-        }
 
         return buildResponse(user, steps);
     }
@@ -107,14 +92,7 @@ public class RoadmapServiceImpl implements RoadmapService {
 
         User user = getCurrentUser();
 
-        RoadmapStep step = roadmapStepRepository.findById(stepId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Roadmap step not found", "STEP_NOT_FOUND"));
-
-        if (!step.getUser().getId().equals(user.getId())) {
-            throw new ResourceNotFoundException(
-                    "Roadmap step not found", "STEP_NOT_FOUND");
-        }
+        RoadmapStep step = getOwnedStep(stepId, user);
 
         if (Boolean.TRUE.equals(step.getCompleted())) {
             throw new BadRequestException(
@@ -126,6 +104,25 @@ public class RoadmapServiceImpl implements RoadmapService {
         roadmapStepRepository.save(step);
         log.info("Step {} marked as completed for user: {}",
                 stepId, user.getEmail());
+    }
+
+    @Override
+    @Transactional
+    public void deleteStep(Long stepId) {
+        User user = getCurrentUser();
+        RoadmapStep step = getOwnedStep(stepId, user);
+
+        roadmapStepRepository.delete(step);
+        log.info("Step {} deleted from roadmap for user: {}",
+                stepId, user.getEmail());
+    }
+
+    @Override
+    @Transactional
+    public void clearRoadmap() {
+        User user = getCurrentUser();
+        roadmapStepRepository.deleteAllByUser(user);
+        log.info("Roadmap cleared for user: {}", user.getEmail());
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
@@ -154,6 +151,19 @@ public class RoadmapServiceImpl implements RoadmapService {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "User not found", "USER_NOT_FOUND"));
+    }
+
+    private RoadmapStep getOwnedStep(Long stepId, User user) {
+        RoadmapStep step = roadmapStepRepository.findById(stepId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Roadmap step not found", "STEP_NOT_FOUND"));
+
+        if (!step.getUser().getId().equals(user.getId())) {
+            throw new ResourceNotFoundException(
+                    "Roadmap step not found", "STEP_NOT_FOUND");
+        }
+
+        return step;
     }
 
     private RoadmapResponse buildResponse(User user, List<RoadmapStep> steps) {
